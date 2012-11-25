@@ -17,7 +17,7 @@ class SortMessageService
     index = if match.class == MatchData && !match.nil?
       match.to_a.last.to_s.split(':')[1][1..-1].to_i
     else
-      raise SmsGateway::FailedToCreateSms.new
+      raise Phone::FailedToCreateSms.new
     end
     @module.send_command "CMSS=#{index}"
     true
