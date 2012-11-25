@@ -1,0 +1,4 @@
+---
+- :ZTEMF180:
+    :device_path: /dev/cu.ZTEUSBATPort_
+    :loader_command: ZOPRT=5
