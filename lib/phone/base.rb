@@ -7,26 +7,23 @@ module Phone
   class Unknown < Exception;  end
   
   class << self
-    attr_accessor :device_path, :loader_command   
+    #attr_accessor :device_path, :loader_command
+    
+    
     def configure
-      @device_path = {}
-      @loader_command = {}
       config = YAML.load_file "#{Phone::root}/config.yml"
       config.each do |conf|        
         conf.each do |key, value|
-          Phone.device_path[key.to_s.capitalize] = value[:device_path]
-          Phone.loader_command[key.to_s.capitalize] = value[:loader_command]
+          #Phone.device_path[key.to_s.capitalize] = 
+          #Phone.loader_command[key.to_s.capitalize] = value[:loader_command]
           module_name = key.to_s.capitalize
           modul = self.const_set(module_name, Module.new)
-          modul.class_eval do
-            class << self
-              attr_accessor :serialport
-              
-              def configure
-                identifier = self.to_s.split('::')
-                self.serialport = SerialPort.new(Phone.device_path[identifier[1]],"115200".to_i)
-                self.send_command("#{Phone.loader_command[identifier[1]]}") unless Phone.loader_command[identifier[1]].nil?
-                self.serialport.read_timeout = 300
+          modul.module_eval do
+            class << self 
+              attr_accessor :serialport, :loader_command
+                            
+              def send_loader_command
+                self.send_command(@loader_command)
               end
               
               def send_command(command)
@@ -45,8 +42,11 @@ module Phone
                 self.serialport.close
               end
             end
-            
-            self.const_set("Sms",Class.new(SortMessageService))
+            self.serialport = SerialPort.new(value[:device_path],"115200".to_i)
+            self.loader_command = value[:loader_command]
+            self.serialport.read_timeout = 300            
+            self.send_loader_command unless value[:loader_command].nil?         
+            klass = self.const_set("Sms",Class.new(Phone::Message))
           end            
         end
       end

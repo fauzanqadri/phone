@@ -1,14 +1,12 @@
 # Phone
 
-gem that interact to your usb to make a call, and SMS
+gem that interact to your usb-modem/phone to make a call, and SMS
 
 ## Installation
 
 clone to your computer
 plug your modem or phone into computer
-
 And then execute:
-
 	$ cd /your/foo/path/to/phone
     $ bundle install
 
@@ -16,29 +14,29 @@ And then execute:
 
 take a look to `/lib/config.yml`
 example :
-
 	- :NOKIAN70:
     	:device_path: /dev/cu.NokiaN70
 	- :ZTEMF180:
 		:device_path: /dev/cu.ZTEATPORT_
-		
-`yeah for now only testing on nix nux based`
-		
+		:loader_command: ZOPRT=5		
+`yeah for now only testing on nix nux based`		
 add those configuration line to `config.yml`
 then inside the phone directory hit
-
 	$ rake console
-
-now we can do like this
-	 
-	>> a = Phone::Nokian70::Sms.new
-	>> a.create :phone_number => "081234567890", :message => "Hello World, this message create using ruby :)"
-	>> b = Phone::Ztemf180::Sms.new
-	>> b.create :phone_number => "081234567890", :message => "Hello World, this message create using ruby and another phone :)"
-	
+for sending message: 
+now we can do like this	 
+	>> a = Phone::Nokian70::Sms.new(:phone_number => "081234567890", :message => "Hello World, this message create using ruby :)")
+	>> a.send
+`inbox, outbox and draft are not implement yet`
 ## Device testing
+
 * ZTE MF180
 
+## Requirements
+
+* `Ruby 1.9.3`
+* `serialport gem`
+* `ActiveSpport gem`
 
 ## Contributing
 
