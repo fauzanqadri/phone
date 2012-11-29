@@ -1,6 +1,7 @@
 require 'serialport'
 require 'active_support/inflector'
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/object/instance_variables'
 require 'active_support/callbacks'
 require 'yaml'
 require "phone/base"

@@ -6,21 +6,6 @@ module Phone
       @phone_number = attribute[:phone_number] || nil
       @message = attribute[:message] || nil    
     end
-      
-    def self.class_identifier
-      self.to_s.split('::')
-    end
-    
-    def self.modul
-      "Phone::#{self.class_identifier[1]}".constantize
-    end
-    
-    
-    class << self
-      def hello
-        puts modul
-      end
-    end
     
     def send
       self.class.modul.send_command("CMGF=1")
@@ -35,7 +20,67 @@ module Phone
       @message.length
     end
     
+    class << self
+      
+      def class_identifier
+        self.to_s.split('::')
+      end
+    
+      def modul
+        "Phone::#{self.class_identifier[1]}".constantize
+      end
+    
+      def inbox
+        res = read_message
+        messages = res.scan(/\+CMGL\:\s*?(\d+)\,\"\REC READ"\,\"(.+?)\"\,.*?\,\"(.+?)\".*?\n(.*)/)
+        messages.each do |message|
+          a = {
+            phone_number: message[1],
+            message: message[3].chomp!
+          }
+          result << a
+        end
+        result
+      end
+      
+      def outbox
+        res = read_message
+        messages = res.scan(/\+CMGL\:\s*?(\d+)\,\"\STO SENT\"\,\"(.+?)\"\,\,.*?\n(.*)/)
+        messages.each do |message|
+          a = {
+            phone_number: message[1],
+            message: message[2].chomp!
+          }
+          result << a
+        end
+        result
+      end
+      
+      def draft
+        res = read_message
+        messages = res.scan(/\+CMGL\:\s*?(\d+)\,\"\STO UNSENT\"\,\"(.+?)\"\,\,.*?\n(.*)/)
+        messages.each do |message|
+          a = {
+            phone_number: message[1],
+            message: message[2].chomp!
+          }
+          result << a
+        end
+        result
+      end
+    end
+    
     private
+    
+    def read_message
+      result = []
+      modul.send_command("CMGF=1")
+      sleep 1
+      modul.send_command("CMGL=\"ALL\"")
+      sleep 3
+      modul_result
+    end
+    
     def sending phone_number
       self.class.modul.send_command("CMGW=\"#{phone_number}\"")
       self.class.modul.send_text("#{@message}#{26.chr}\r")
